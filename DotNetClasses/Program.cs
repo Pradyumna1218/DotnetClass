@@ -84,8 +84,33 @@ class Program
 
     static void SearchStatus()
     {
-        Console.WriteLine("Enter status:");
-        string status = Console.ReadLine() ?? "";
+        Console.WriteLine("\n1. Completed");
+        Console.WriteLine("2. Pending");
+
+        Console.Write("Enter Choice: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int choice))
+        {
+            Console.WriteLine("Invalid choice.");
+            return;
+        }
+
+        string status = "";
+
+        switch (choice)
+        {
+            case 1:
+                status = "Completed";
+                break;
+
+            case 2:
+                status = "Pending";
+                break;
+
+            default:
+                Console.WriteLine("Invalid choice.");
+                return;
+        }
 
         var filteredTasks = tasks.Where(t =>
             t.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
@@ -98,11 +123,12 @@ class Program
 
         foreach (Task task in filteredTasks)
         {
-            Console.WriteLine($"ID: {task.Id}");
-            Console.WriteLine($"Department: {task.Department}");
-            Console.WriteLine($"Status: {task.Status}");
+            Console.WriteLine("Id: " + task.Id);
+            Console.WriteLine("Department: " + task.Department);
+            Console.WriteLine("Status: " + task.Status);
         }
     }
+
 
     static void Main()
     {
