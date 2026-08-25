@@ -1,9 +1,9 @@
 ﻿
 class Task
 {
-    public int id;
-    public string status;
-    public string department;
+    public int Id { get; set; }
+    public string Status { get; set; }
+    public string Department { get; set; }
 }
 
 class Program
@@ -21,12 +21,12 @@ class Program
             Console.WriteLine("Invalid ID");
             return;
         }
-        task.id = id;
+        task.Id = id;
 
         Console.WriteLine("Enter department");
-        task.department = Console.ReadLine();
+        task.Department = Console.ReadLine();
 
-        task.status = "Pending";
+        task.Status = "Pending";
 
         tasks.Add(task);
     }
@@ -36,9 +36,9 @@ class Program
         
         foreach (Task task in tasks)
         {
-            Console.WriteLine("Id: " + task.id);
-            Console.WriteLine("Department: " + task.department);
-            Console.WriteLine("Status: " + task.status);
+            Console.WriteLine("Id: " + task.Id);
+            Console.WriteLine("Department: " + task.Department);
+            Console.WriteLine("Status: " + task.Status);
         }
     }
 
@@ -53,9 +53,9 @@ class Program
 
         foreach (Task task in tasks)
         {
-            if (task.id == id)
+            if (task.Id == id)
             {
-                task.status = "Completed";
+                task.Status = "Completed";
                 Console.WriteLine("Task status was changed to completed");
                 return;
             }
@@ -74,7 +74,7 @@ class Program
 
         foreach (Task task in tasks)
         {
-            if (task.id == id)
+            if (task.Id == id)
             {
                 tasks.Remove(task);
                 return;
@@ -88,7 +88,7 @@ class Program
         string status = Console.ReadLine() ?? "";
 
         var filteredTasks = tasks.Where(t =>
-            t.status.Equals(status, StringComparison.OrdinalIgnoreCase));
+            t.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
 
         if (!filteredTasks.Any())
         {
@@ -98,9 +98,9 @@ class Program
 
         foreach (Task task in filteredTasks)
         {
-            Console.WriteLine($"ID: {task.id}");
-            Console.WriteLine($"Department: {task.department}");
-            Console.WriteLine($"Status: {task.status}");
+            Console.WriteLine($"ID: {task.Id}");
+            Console.WriteLine($"Department: {task.Department}");
+            Console.WriteLine($"Status: {task.Status}");
         }
     }
 
