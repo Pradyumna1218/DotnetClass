@@ -1,39 +1,64 @@
-﻿
-class Task
+﻿class Entity
 {
     public int Id { get; set; }
-    public string Status { get; set; }
+    public static int count = 1;
+}
+
+
+class Task : Entity
+{
+    private string _status = "";
+    public string Status {
+        get => _status;
+        set => _status = value == "pending" || value == "completed"
+         ? value
+         : throw new ArgumentException("Status must be Pending or Completed");
+    }
     public string Department { get; set; }
 }
 
-class Program
+
+abstract class SearchTask()
 {
-    static List<Task> tasks = new List<Task>();
+    public abstract Task FindByID(int id);
+}
 
-    static void AddTask()
+
+
+class TaskMethods: SearchTask
+{
+    private static List<Task> tasks = new List<Task>();
+
+    public override Task FindByID(int id)
     {
-        Task task = new Task();
-
-
-        Console.WriteLine("Enter ID: ");
-        if (!int.TryParse(Console.ReadLine(), out int id))
-        {
-            Console.WriteLine("Invalid ID");
-            return;
-        }
-        task.Id = id;
-
-        Console.WriteLine("Enter department");
-        task.Department = Console.ReadLine();
-
-        task.Status = "Pending";
-
-        tasks.Add(task);
+        return tasks.FirstOrDefault(t => t.Id == id);
     }
 
-    static void ListTask()
+    public void AddTask()
+
     {
-        
+
+        Task task = new Task();
+
+        Console.WriteLine("Enter department: ");
+        task.Department = Console.ReadLine();
+        try
+        {
+            Console.WriteLine("Enter Status: ");
+            task.Status = (Console.ReadLine()).ToLower();
+
+            task.Id = Entity.count++;
+            tasks.Add(task);
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public void ListTask()
+    {
+
         foreach (Task task in tasks)
         {
             Console.WriteLine("Id: " + task.Id);
@@ -42,7 +67,7 @@ class Program
         }
     }
 
-    static void CompleteTask()
+    public void CompleteTask()
     {
         Console.WriteLine("Enter the task id to complete: ");
         if (!int.TryParse(Console.ReadLine(), out int id))
@@ -51,19 +76,18 @@ class Program
             return;
         }
 
-        foreach (Task task in tasks)
+        Task task = FindByID(id);
+        
+        if (task == null)
         {
-            if (task.Id == id)
-            {
-                task.Status = "Completed";
-                Console.WriteLine("Task status was changed to completed");
-                return;
-            }
+            Console.WriteLine("Task not found");
+            return;
         }
-        Console.WriteLine("Didn't find the id try again");
+        task.Status = "completed";
+        Console.WriteLine("Task status was changed to completed");
     }
 
-    static void DeleteTask()
+    public void DeleteTask()
     {
         Console.WriteLine("Enter the id to delete: ");
         if (!int.TryParse(Console.ReadLine(), out int id))
@@ -71,18 +95,18 @@ class Program
             Console.WriteLine("Invalid ID");
             return;
         }
-
-        foreach (Task task in tasks)
+        Task task = FindByID(id);
+        if(task == null)
         {
-            if (task.Id == id)
-            {
-                tasks.Remove(task);
-                return;
-            }
+            Console.WriteLine("Task not found");
+            return;
         }
+        tasks.Remove(task);
+        Console.WriteLine("Task deleted successfully");
+        
     }
 
-    static void SearchStatus()
+    public void SearchStatus()
     {
         Console.WriteLine("\n1. Completed");
         Console.WriteLine("2. Pending");
@@ -129,9 +153,17 @@ class Program
         }
     }
 
+    
+}
 
+
+
+class Program
+{
     static void Main()
     {
+        TaskMethods t1 = new TaskMethods();
+
         while (true)
         {
             Console.WriteLine("\n1-> Add new Task");
@@ -151,19 +183,19 @@ class Program
             switch (choice)
             {
                 case 1:
-                    AddTask();
+                    t1.AddTask();
                     break;
                 case 2:
-                    ListTask();
+                    t1.ListTask();
                     break;
                 case 3:
-                    CompleteTask();
+                    t1.CompleteTask();
                     break;
                 case 4:
-                    DeleteTask();
+                    t1.DeleteTask();
                     break;
                 case 5:
-                    SearchStatus();
+                    t1.SearchStatus();
                     break;
                 case 6:
                     return;
