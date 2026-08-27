@@ -24,7 +24,6 @@ abstract class SearchTask()
 }
 
 
-
 class TaskMethods: SearchTask
 {
     private static List<Task> tasks = new List<Task>();
@@ -157,53 +156,99 @@ class TaskMethods: SearchTask
 }
 
 
-
 class Program
 {
     static void Main()
     {
         TaskMethods t1 = new TaskMethods();
 
-        while (true)
+        //while (true)
+        //{
+        //    Console.WriteLine("\n1-> Add new Task");
+        //    Console.WriteLine("2-> SHow all Tasks");
+        //    Console.WriteLine("3-> Complete a task");
+        //    Console.WriteLine("4-> Delete a task");
+        //    Console.WriteLine("5-> Search By Status");
+        //    Console.WriteLine("6-> EXIT");
+
+        //    Console.WriteLine("Enter a choice: ");
+        //    if (!int.TryParse(Console.ReadLine(), out int choice))
+        //    {
+        //        Console.WriteLine("Invalid choice");
+        //        continue;
+        //    };
+
+        //    switch (choice)
+        //    {
+        //        case 1:
+        //            t1.AddTask();
+        //            break;
+        //        case 2:
+        //            t1.ListTask();
+        //            break;
+        //        case 3:
+        //            t1.CompleteTask();
+        //            break;
+        //        case 4:
+        //            t1.DeleteTask();
+        //            break;
+        //        case 5:
+        //            t1.SearchStatus();
+        //            break;
+        //        case 6:
+        //            return;
+
+        //        default:
+        //            Console.WriteLine("Invalid choice see menu again");
+        //            break;
+        //    }
+
+        //}
+
+        List<WorkItem> items = new()
         {
-            Console.WriteLine("\n1-> Add new Task");
-            Console.WriteLine("2-> SHow all Tasks");
-            Console.WriteLine("3-> Complete a task");
-            Console.WriteLine("4-> Delete a task");
-            Console.WriteLine("5-> Search By Status");
-            Console.WriteLine("6-> EXIT");
+            WorkItemFactory.Create(
+                "task",
+                "This is task 1",
+                2
+                ),
+            WorkItemFactory.Create(
+                "bug",
+                "This is bug 1",
+                5
+                ),
+            WorkItemFactory.Create(
+                "task",
+                "DO task",
+                3
+                )
+        };
 
-            Console.WriteLine("Enter a choice: ");
-            if (!int.TryParse(Console.ReadLine(), out int choice))
-            {
-                Console.WriteLine("Invalid choice");
-                continue;
-            };
+        items.Sort();
+        Console.WriteLine("This is sorted by priority");
+        Console.WriteLine("High num = Higher Priority");
 
-            switch (choice)
-            {
-                case 1:
-                    t1.AddTask();
-                    break;
-                case 2:
-                    t1.ListTask();
-                    break;
-                case 3:
-                    t1.CompleteTask();
-                    break;
-                case 4:
-                    t1.DeleteTask();
-                    break;
-                case 5:
-                    t1.SearchStatus();
-                    break;
-                case 6:
-                    return;
+        foreach(var item in items)
+        {
+            item.Display();
+        }
 
-                default:
-                    Console.WriteLine("Invalid choice see menu again");
-                    break;
-            }
-       }
+        //Enqueue
+        Queue<WorkItem> queue = new ();
+        foreach(var item in items)
+        {
+            queue.Enqueue(item);
+        }
+
+        //Dequeue
+        Console.WriteLine("Review Queue");
+        while(queue.Count > 0)
+        {
+            WorkItem current = queue.Dequeue();
+            Console.WriteLine("Reviewing: ");
+            current.Display();
+        }
+
+       
     }
 }
