@@ -1,13 +1,20 @@
-﻿class Entity
+﻿using System.Text.RegularExpressions;
+
+class Entity
 {
     public int Id { get; set; }
     public static int count = 1;
+
 }
 
 
 class Task : Entity
 {
     private string _status = "";
+    
+    private DateTime _createdDate; 
+    private DateTime _updatedDate; 
+    private DateOnly _effectiveDate; 
     public string Status {
         get => _status;
         set => _status = value == "pending" || value == "completed"
@@ -15,10 +22,30 @@ class Task : Entity
          : throw new ArgumentException("Status must be Pending or Completed");
     }
     public string Department { get; set; }
+
+    public DateTime CreatedDate
+    {
+        get => _createdDate;
+        set => _createdDate = value;
+    }
+    public DateTime UpdatedDate
+    {
+        get => _updatedDate;
+        set => _updatedDate = value;
+    }
+    public DateOnly EffectiveDate
+    {
+        get => _effectiveDate;
+        set => _effectiveDate = value;
+    }
+    public Task()
+    {
+        CreatedDate = DateTime.Now;
+    }
 }
 
 
-abstract class SearchTask()
+abstract class SearchTask
 {
     public abstract Task FindByID(int id);
 }
@@ -39,30 +66,67 @@ class TaskMethods: SearchTask
 
         Task task = new Task();
 
-        Console.WriteLine("Enter department: ");
-        task.Department = Console.ReadLine();
-        try
-        {
-            Console.WriteLine("Enter Status: ");
-            task.Status = (Console.ReadLine()).ToLower();
+        task.Id = Entity.count++;
 
-            task.Id = Entity.count++;
-            tasks.Add(task);
-        }
-        catch (ArgumentException ex)
+        Console.Write("Enter Department: ");
+        task.Department = Console.ReadLine();
+
+        task.Status = "pending";
+
+        DateOnly effectiveDate;
+
+        while (true)
         {
-            Console.WriteLine(ex.Message);
+            Console.Write("Enter Effective Date (yyyy-MM-dd): ");
+            string inputDate = Console.ReadLine();
+
+            if (!Regex.IsMatch(inputDate, @"^\d{4}-\d{2}-\d{2}$"))
+            {
+                Console.WriteLine("Invalid date format. Use yyyy-MM-dd");
+                continue;
+            }
+
+            if (!DateOnly.TryParse(inputDate, out effectiveDate))
+            {
+                Console.WriteLine("Invalid calendar date.");
+                continue;
+            }
+
+            break;
         }
+
+        task.EffectiveDate = effectiveDate;
+        task.CreatedDate = DateTime.Now;
+        task.UpdatedDate = DateTime.Now;
+
+        tasks.Add(task);
+
+        Console.WriteLine("Task added successfully!");
+        Console.WriteLine($"Task ID: {task.Id}");
     }
 
     public void ListTask()
     {
+        if(tasks.Count == 0)
+        {
+            Console.WriteLine("NO tasks available");
+            return;
+        }
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
         foreach (Task task in tasks)
         {
-            Console.WriteLine("Id: " + task.Id);
-            Console.WriteLine("Department: " + task.Department);
-            Console.WriteLine("Status: " + task.Status);
+            if(task.EffectiveDate <= today)
+            {
+                Console.WriteLine("Id: " + task.Id);
+                Console.WriteLine("Department: " + task.Department);
+                Console.WriteLine("Status: " + task.Status);
+                Console.WriteLine($"Created Date: {task.CreatedDate}");
+                Console.WriteLine($"Updated Date: {task.UpdatedDate}");
+                Console.WriteLine($"Effective Date: {task.EffectiveDate}");
+                Console.WriteLine();
+            }
+            
         }
     }
 
@@ -83,6 +147,7 @@ class TaskMethods: SearchTask
             return;
         }
         task.Status = "completed";
+        task.UpdatedDate = DateTime.Now;
         Console.WriteLine("Task status was changed to completed");
     }
 
@@ -123,11 +188,11 @@ class TaskMethods: SearchTask
         switch (choice)
         {
             case 1:
-                status = "Completed";
+                status = "completed";
                 break;
 
             case 2:
-                status = "Pending";
+                status = "pending";
                 break;
 
             default:
@@ -149,10 +214,16 @@ class TaskMethods: SearchTask
             Console.WriteLine("Id: " + task.Id);
             Console.WriteLine("Department: " + task.Department);
             Console.WriteLine("Status: " + task.Status);
+            Console.WriteLine("Created Date: " + task.CreatedDate);
+            Console.WriteLine("Updated Date: " + task.UpdatedDate);
+            Console.WriteLine("Effective Date: " + task.EffectiveDate);
+            Console.WriteLine();
         }
     }
 
-    
+
+
+
 }
 
 
@@ -162,48 +233,49 @@ class Program
     {
         TaskMethods t1 = new TaskMethods();
 
-        //while (true)
-        //{
-        //    Console.WriteLine("\n1-> Add new Task");
-        //    Console.WriteLine("2-> SHow all Tasks");
-        //    Console.WriteLine("3-> Complete a task");
-        //    Console.WriteLine("4-> Delete a task");
-        //    Console.WriteLine("5-> Search By Status");
-        //    Console.WriteLine("6-> EXIT");
+        while (true)
+        {
+            Console.WriteLine("\n1-> Add new Task");
+            Console.WriteLine("2-> SHow all Tasks");
+            Console.WriteLine("3-> Complete a task");
+            Console.WriteLine("4-> Delete a task");
+            Console.WriteLine("5-> Search By Status");
+            Console.WriteLine("6-> EXIT");
 
-        //    Console.WriteLine("Enter a choice: ");
-        //    if (!int.TryParse(Console.ReadLine(), out int choice))
-        //    {
-        //        Console.WriteLine("Invalid choice");
-        //        continue;
-        //    };
+            Console.WriteLine("Enter a choice: ");
+            if (!int.TryParse(Console.ReadLine(), out int choice))
+            {
+                Console.WriteLine("Invalid choice");
+                continue;
+            }
+            ;
 
-        //    switch (choice)
-        //    {
-        //        case 1:
-        //            t1.AddTask();
-        //            break;
-        //        case 2:
-        //            t1.ListTask();
-        //            break;
-        //        case 3:
-        //            t1.CompleteTask();
-        //            break;
-        //        case 4:
-        //            t1.DeleteTask();
-        //            break;
-        //        case 5:
-        //            t1.SearchStatus();
-        //            break;
-        //        case 6:
-        //            return;
+            switch (choice)
+            {
+                case 1:
+                    t1.AddTask();
+                    break;
+                case 2:
+                    t1.ListTask();
+                    break;
+                case 3:
+                    t1.CompleteTask();
+                    break;
+                case 4:
+                    t1.DeleteTask();
+                    break;
+                case 5:
+                    t1.SearchStatus();
+                    break;
+                case 6:
+                    return;
 
-        //        default:
-        //            Console.WriteLine("Invalid choice see menu again");
-        //            break;
-        //    }
+                default:
+                    Console.WriteLine("Invalid choice see menu again");
+                    break;
+            }
 
-        //}
+        }
 
         List<WorkItem> items = new()
         {
@@ -248,7 +320,6 @@ class Program
             Console.WriteLine("Reviewing: ");
             current.Display();
         }
-
        
     }
 }
