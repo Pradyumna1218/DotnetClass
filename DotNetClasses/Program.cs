@@ -1,4 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+using System.Text.Json;
+
 
 class Entity
 {
@@ -54,10 +56,52 @@ abstract class SearchTask
 class TaskMethods: SearchTask
 {
     private static List<Task> tasks = new List<Task>();
+    private const string FilePath = "tasks.json";
 
     public override Task FindByID(int id)
     {
         return tasks.FirstOrDefault(t => t.Id == id);
+    }
+
+    public void SaveTask()
+    {
+        string json = JsonSerializer.Serialize(tasks, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+
+        File.WriteAllText(FilePath, json);
+        Console.WriteLine("Tasks saved successfully. ");
+
+    }
+
+    public void LoadTask()
+    {
+        if (!File.Exists(FilePath))
+        {
+            tasks = new List<Task>();
+            Entity.count = 1;
+            return;
+        }
+
+        string json = File.ReadAllText(FilePath);
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            tasks = new List<Task>();
+            Entity.count = 1;
+            return;
+        }
+
+        tasks = JsonSerializer.Deserialize<List<Task>>(json)
+                ?? new List<Task>();
+
+        Entity.count = tasks.Count > 0
+            ? tasks.Max(t => t.Id) + 1
+            : 1;
+    
+        Console.WriteLine("Tasks loaded");
+        Console.WriteLine(Path.GetFullPath("tasks.json"));
     }
 
     public void AddTask()
@@ -100,6 +144,7 @@ class TaskMethods: SearchTask
         task.UpdatedDate = DateTime.Now;
 
         tasks.Add(task);
+        SaveTask();
 
         Console.WriteLine("Task added successfully!");
         Console.WriteLine($"Task ID: {task.Id}");
@@ -107,7 +152,8 @@ class TaskMethods: SearchTask
 
     public void ListTask()
     {
-        if(tasks.Count == 0)
+        LoadTask();
+        if (tasks.Count == 0)
         {
             Console.WriteLine("NO tasks available");
             return;
@@ -148,6 +194,7 @@ class TaskMethods: SearchTask
         }
         task.Status = "completed";
         task.UpdatedDate = DateTime.Now;
+        SaveTask();
         Console.WriteLine("Task status was changed to completed");
     }
 
@@ -166,6 +213,7 @@ class TaskMethods: SearchTask
             return;
         }
         tasks.Remove(task);
+        SaveTask();
         Console.WriteLine("Task deleted successfully");
         
     }
@@ -220,10 +268,6 @@ class TaskMethods: SearchTask
             Console.WriteLine();
         }
     }
-
-
-
-
 }
 
 
@@ -232,8 +276,11 @@ class Program
     static void Main()
     {
         TaskMethods t1 = new TaskMethods();
+        t1.LoadTask();
+        Console.WriteLine(Path.GetFullPath("tasks.json"));
+        bool running = true;
 
-        while (true)
+        while (running)
         {
             Console.WriteLine("\n1-> Add new Task");
             Console.WriteLine("2-> SHow all Tasks");
@@ -268,7 +315,8 @@ class Program
                     t1.SearchStatus();
                     break;
                 case 6:
-                    return;
+                    running = false;
+                    break;
 
                 default:
                     Console.WriteLine("Invalid choice see menu again");
@@ -276,6 +324,8 @@ class Program
             }
 
         }
+
+        //Factory patten and enque dequeue
 
         List<WorkItem> items = new()
         {
@@ -298,11 +348,13 @@ class Program
 
         items.Sort();
         Console.WriteLine("This is sorted by priority");
-        Console.WriteLine("High num = Higher Priority");
+        Console.WriteLine("High num = Higher Priority\n");
 
         foreach(var item in items)
         {
+            Console.WriteLine();
             item.Display();
+
         }
 
         //Enqueue
